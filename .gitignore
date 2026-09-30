@@ -1,0 +1,6 @@
+tmp/
+__pycache__/
+*.nc
+*.tar.gz
+*.tar.bz2
+log.*
