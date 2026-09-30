@@ -18,7 +18,7 @@
   </stream>
   <stream name="surface" type="input"
     filename_template="heatwave2022.sfc_update.nc"
-    filename_interval="none" input_interval="1:00:00">
+    filename_interval="none" input_interval="none">
     <file name="stream_list.atmosphere.surface" />
   </stream>
   <immutable_stream name="iau" type="input"

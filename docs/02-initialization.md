@@ -2,7 +2,7 @@
 
 Guide 2 of 3 | LIU Zhuo | The Hong Kong University of Science and Technology
 
-Compile both cores using Guide 1 first. This guide prepares geographic fields, initial conditions and surface updates for a global Hong Kong-refined mesh.
+Compile both cores using Guide 1 first. This guide prepares geographic fields and initial conditions for a global Hong Kong-refined mesh. Surface updates are optional.
 
 ## Step 1 | Prepare the mesh and ERA5 inputs
 
@@ -10,10 +10,10 @@ The teaching period is 2022-07-19 00:00 UTC to 2022-07-30 06:00 UTC. Follow the 
 
 Prepare a model-ready spherical MPAS mesh and its matching, unpartitioned graph. Complete the mesh conversion/scaling steps in the mesh workflow; a raw unit-sphere mesh is not the final Earth-sized input. Keep the cell ordering identical between mesh and graph.
 
-Prepare two separate inputs from ERA5 [pressure-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels) and [single-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels) data:
+Prepare ERA5 [pressure-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels) and [single-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels) data as follows:
 
 - Initial conditions: one complete intermediate file, `ERA5:2022-07-19_00`, containing the required atmospheric, surface and soil fields.
-- Surface updates: SST and sea-ice fields every 3 hours from 19 July 00:00 to 30 July 06:00 UTC, prepared with the separate prefix `SST`. The inspected case surface file has 3-hourly records.
+- Optional surface updates: only if you choose Step 7, prepare SST and sea-ice fields every 3 hours from 19 July 00:00 to 30 July 06:00 UTC with prefix `SST`. Otherwise, the one complete initial-time ERA5 file is sufficient.
 
 This is a global simulation: no time series of atmospheric lateral-boundary forcing is needed. Do not download complete atmospheric and soil fields for every later time just to update SST.
 
@@ -25,11 +25,7 @@ This repository does not distribute a ready mesh or ERA5 archive. After preparat
 $HOME/MPAS/DATA/heatwave2022/
 |-- heatwave2022.grid.nc
 |-- heatwave2022.graph.info
-|-- ERA5:2022-07-19_00
-|-- SST:2022-07-19_00
-|-- SST:2022-07-19_03
-|-- ...
-`-- SST:2022-07-30_06
+`-- ERA5:2022-07-19_00
 ```
 
 ## Step 2 | Prepare static geographic data
@@ -120,7 +116,7 @@ export NPROCS=112
 gpmetis heatwave2022.graph.info "$NPROCS"
 ```
 
-The following commands use `NPROCS` for the task count. Keep the same value in Guide 3. Do not rename `.part.192` to `.part.112`; it contains a different decomposition. The namelist prefix stays `heatwave2022.graph.info.part.`.
+Initial-condition generation, optional surface-update generation and the atmosphere run use `NPROCS`. The static stage below uses one MPI process. Keep the selected `NPROCS` value in Guide 3. Do not rename `.part.192` to `.part.112`; it contains a different decomposition. The namelist prefix stays `heatwave2022.graph.info.part.`.
 
 ## Step 5 | Generate the static file
 
@@ -149,10 +145,10 @@ The static stage has these six switches:
 
 The first two create geographic and native-mesh gravity-wave-drag fields. This stage does not interpolate ERA5 or build the vertical grid.
 
-Run in an allocated compute session:
+Run this tutorial's static stage with one MPI process, using the same MPI environment as the build:
 
 ```bash
-mpiexec -n "$NPROCS" ./init_atmosphere_model
+mpirun -np 1 ./init_atmosphere_model
 cp log.init_atmosphere.0000.out log.static.out
 ls -lh heatwave2022.static.nc
 tail -n 20 log.static.out
@@ -200,9 +196,18 @@ tail -n 20 log.initial.out
 
 Allow tens of minutes to hours as a broad planning range; actual time depends on the machine and input. Check the log rather than assuming a quiet terminal means the job has stopped.
 
-## Step 7 | Generate surface updates
+## Step 7 | Optional: generate surface updates
 
-The run uses evolving SST. Use the 3-hourly SST and sea-ice intermediate files prepared in Step 1. These are surface-only inputs, separate from the single complete ERA5 initialization file.
+The basic tutorial keeps SST updates off. After Step 6, you can go directly to Guide 3 without preparing any `SST:*` files or generating `heatwave2022.sfc_update.nc`.
+
+The original case enabled SST updates. If you choose this option, prepare these additional surface-only intermediate files under `$INPUT`, using ERA5 SST and sea-ice fields every 3 hours:
+
+```text
+SST:2022-07-19_00
+SST:2022-07-19_03
+...
+SST:2022-07-30_06
+```
 
 ```bash
 test -s "$INPUT/SST:2022-07-19_00"
@@ -243,4 +248,4 @@ ncdump -v xtime heatwave2022.sfc_update.nc
 
 Check that `xtime` contains records every 3 hours, covering 19 July 00:00 through 30 July 06:00 UTC. The original atmosphere configuration's hourly surface-stream read interval is retained; it is not a requirement for hourly ERA5 input records.
 
-You now have the three generated inputs: `heatwave2022.static.nc`, `heatwave2022.init.nc` and `heatwave2022.sfc_update.nc`. Continue with Guide 3.
+After completing this optional step, enable SST updates as described in Guide 3. Otherwise, keep the default settings and use the static and initial files generated in Steps 5 and 6.

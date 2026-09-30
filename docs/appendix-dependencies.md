@@ -1,4 +1,4 @@
-# Appendix: Build the MPAS Dependencies from Scratch
+# Appendix A: Install the build and runtime environment
 
 Use this appendix only when the server does not already provide a compatible GNU compiler, MPI, NetCDF, and PnetCDF environment. On a managed HPC cluster, the modules supported by the site are usually the better choice.
 
@@ -25,9 +25,41 @@ The required library build order is:
 
 Stop if any `make check`, file check, or prefix check fails. Continuing with a partially installed stack usually causes a less obvious MPAS compile or runtime error later.
 
+## Install the compiler and basic tools
+
+The following commands are for Ubuntu 22.04 and require administrator privileges. On a managed cluster without `sudo`, load the site's compiler module and ask the administrator for any missing tools instead.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+  build-essential gfortran git curl ca-certificates \
+  m4 perl tar gzip bzip2 xz-utils nano
+```
+
+`build-essential` provides GCC, G++ and Make; `gfortran` provides the Fortran compiler. The remaining tools download, unpack, configure and edit the source files. See the [Ubuntu GNU Fortran package](https://packages.ubuntu.com/jammy/gfortran).
+
+```bash
+gcc --version
+g++ --version
+gfortran --version
+make --version
+command -v git curl m4 perl tar nano
+```
+
+## Install METIS for mesh partitioning
+
+On Ubuntu, install the partitioning tools and check for `gpmetis`:
+
+```bash
+sudo apt-get install -y metis
+command -v gpmetis
+```
+
+On a cluster, use its METIS module or ask the administrator to install it. METIS is used for mesh partitioning, not linked into the MPAS executable.
+
 ## Create the local installation prefix
 
-This appendix installs the libraries under one user-owned prefix, so root access is not required. `MPAS_LIB_SRC` stores the downloaded source code, while `MPAS_PREFIX` stores the installed headers, libraries, and configuration tools.
+The remaining MPI and library builds install under user-owned directories and do not need `sudo`. `MPAS_LIB_SRC` stores downloaded library sources, while `MPAS_PREFIX` stores the installed headers, libraries, and configuration tools.
 
 ```bash
 export MPAS_ROOT="$HOME/MPAS"
@@ -78,7 +110,7 @@ mpif90 --showme:command
 mpiexec --version
 ```
 
-The wrapper checks must show the intended GNU compilers. Keep these Open MPI exports active while building PnetCDF and MPAS.
+The wrapper checks must show the intended GNU compilers. Keep these Open MPI exports active while building PnetCDF and MPAS. `--showme:command` is an Open MPI option; for MPICH wrappers use `-show` instead, including in the final checks below.
 
 ## Build zlib 1.3.1
 
@@ -225,6 +257,29 @@ mpiexec --version
 
 All three prefix comparisons must succeed. The header and module checks must also return without an error.
 
-After opening a new shell, reload the same compiler and MPI environment, repeat the prefix exports near the beginning of this appendix, and repeat the `NETCDF`, `NETCDFF`, `PNETCDF`, and `unset PIO` commands before compiling or running MPAS.
+## Restore the environment after logging in again
+
+If you installed Open MPI and the libraries using this appendix, run this block in each new terminal or at the beginning of your batch job:
+
+```bash
+export MPAS_ROOT="$HOME/MPAS"
+export MPAS_PREFIX="$MPAS_ROOT/opt/mpas-libs"
+export MPI_PREFIX="$MPAS_ROOT/opt/openmpi-4.1.6"
+export PATH="$MPI_PREFIX/bin:$MPAS_PREFIX/bin:$PATH"
+export LD_LIBRARY_PATH="$MPI_PREFIX/lib:$MPAS_PREFIX/lib:$MPAS_PREFIX/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+export NETCDF="$(nc-config --prefix)"
+export NETCDFF="$(nf-config --prefix)"
+export PNETCDF="$(pnetcdf-config --prefix)"
+unset PIO
+
+command -v mpicc mpif90 mpirun mpiexec
+nc-config --version
+nf-config --version
+pnetcdf-config --version
+command -v ncdump gpmetis
+```
+
+If you used the site's MPI module instead, load that same module rather than exporting the `MPI_PREFIX` paths above. Restore your library paths as well. You do not need to repeat any download or installation commands after logging in again.
 
 After the dependency checks pass, return to Step 2 of Guide 1 to download and compile HKUST-MPAS.

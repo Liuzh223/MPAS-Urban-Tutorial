@@ -6,7 +6,7 @@ This guide builds the standard HKUST-MPAS `hkust-dev` version. Work in a Linux B
 
 ## Step 1 | Prepare the environment
 
-On a cluster, load the site's GNU compiler, MPI, NetCDF-C, NetCDF-Fortran and PnetCDF modules. Module names are machine-specific. If these libraries are unavailable, complete Appendix A at the end of this PDF before continuing.
+On a cluster, load the site's GNU compiler, MPI, NetCDF-C, NetCDF-Fortran and PnetCDF modules. Module names are machine-specific. If these tools are unavailable, complete [Appendix A: environment installation commands](https://github.com/Liuzh223/MPAS-Urban-Tutorial/blob/main/docs/appendix-dependencies.md), also included at the end of this PDF. It covers the basic tools, MPI, all required libraries, METIS and restoring the environment after login.
 
 ```bash
 export MPAS_ROOT="$HOME/MPAS"
@@ -17,7 +17,7 @@ command -v nc-config nf-config pnetcdf-config
 
 Each command must be found.
 
-You also need METIS `gpmetis` to partition the mesh in Guide 2. Load your site's METIS module or ask the administrator to provide it, then check:
+You also need METIS `gpmetis` to partition the mesh in Guide 2. Load your site's METIS module or use the Ubuntu installation command in Appendix A, then check:
 
 ```bash
 command -v gpmetis

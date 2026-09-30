@@ -35,7 +35,6 @@ The links use the tables already installed by the standard source build. No case
 ```bash
 test -x atmosphere_model
 test -s heatwave2022.init.nc
-test -s heatwave2022.sfc_update.nc
 test -s "heatwave2022.graph.info.part.$NPROCS"
 ls -lh *TBL *DATA*
 ```
@@ -57,7 +56,24 @@ Open `namelist.atmosphere`. The supplied configuration uses:
 
 The physics configuration retains the reference case's choices: Thompson microphysics, Grell-Freitas convection, YSU boundary layer, YSU gravity-wave drag, RRTMG radiation, revised Monin-Obukhov surface layer, and Noah-MP with SLUCM. The supplied namelist also retains the reference Noah-MP option values.
 
-Radiation is called every 30 minutes. SST updates are enabled. The surface file contains 3-hourly records; `streams.atmosphere` retains the original case's hourly surface-read setting. This does not require hourly ERA5 downloads. History and diagnostics are written hourly. The global mesh does not require atmospheric lateral-boundary forcing.
+Radiation is called every 30 minutes. History and diagnostics are written hourly. The global mesh does not require atmospheric lateral-boundary forcing.
+
+SST updates are off by default: `config_sst_update = false` in `namelist.atmosphere`, and the `surface` stream has `input_interval="none"` in `streams.atmosphere`. No surface-update file is required.
+
+### Optional | Enable SST updates
+
+Use this option only after completing Guide 2 Step 7. The original case enabled SST updates. Make both changes in your local case files:
+
+- In `namelist.atmosphere`, under `&physics`, set `config_sst_update = true`.
+- In `streams.atmosphere`, change the `surface` stream's `input_interval` from `"none"` to `"1:00:00"`. Keep its filename `heatwave2022.sfc_update.nc`.
+
+Then check the file:
+
+```bash
+test -s heatwave2022.sfc_update.nc
+```
+
+The file contains 3-hourly surface records. The hourly stream-read setting follows the original case and does not require hourly ERA5 downloads. If you skip this option, leave both defaults unchanged.
 
 ## Step 4 | Run a short test
 

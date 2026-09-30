@@ -39,7 +39,7 @@ The guides define `MPAS_BUILD` as the path to the compiled `HKUST-MPAS` director
 | --- | --- |
 | Simulation period (UTC) | 19 July 2022 00:00 to 30 July 2022 06:00 |
 | Initial conditions | One complete ERA5 input at 19 July 2022 00:00 UTC, in WPS intermediate format |
-| Surface updates | Separate ERA5 SST and sea-ice inputs every 3 hours; no atmospheric lateral-boundary forcing |
+| Surface updates (optional) | Off by default; if enabled, prepare separate ERA5 SST and sea-ice inputs every 3 hours |
 | Mesh | Global variable-resolution mesh, approximately 30 km to 500 m around Hong Kong |
 | Vertical grid | 55 layers; HKUST-MPAS `vertical_levels/urban_ZR_75.txt` |
 | Integration | 8 s time step; hourly history and diagnostics |

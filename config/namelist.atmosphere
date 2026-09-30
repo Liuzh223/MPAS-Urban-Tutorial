@@ -56,7 +56,7 @@
  config_IAU_window_length_s = 21600.0
 /
 &physics
- config_sst_update = true
+ config_sst_update = false
  config_sstdiurn_update = false
  config_deepsoiltemp_update = false
  config_radtlw_interval = '00:30:00'
