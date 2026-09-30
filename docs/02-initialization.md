@@ -120,12 +120,14 @@ The following commands use `NPROCS` for the task count. Keep the same value in G
 ## Step 5 | Generate the static file
 
 ```bash
-cp "$TUTORIAL/config/namelist.init.static" namelist.init_atmosphere
-cp "$TUTORIAL/config/streams.init.static" streams.init_atmosphere
+cp "$TUTORIAL/config/namelist.init_atmosphere" .
+cp "$TUTORIAL/config/streams.init_atmosphere" .
 nano namelist.init_atmosphere
 ```
 
 Change `config_geog_data_path` to the full path of your `DATA/mpas_static` directory, ending in `/`. Fortran namelists do not expand `$HOME`. The supplied file marks this one path with `CHANGE_ME`.
+
+These two files start with the static-stage settings. Keep editing the same local files in Steps 6 and 7; do not copy the originals again. In `streams.init_atmosphere`, the `input` stream reads `heatwave2022.grid.nc` and the `output` stream writes `heatwave2022.static.nc`.
 
 The static stage has these six switches:
 
@@ -156,9 +158,8 @@ Expect a non-empty static file and a normal completion in the log. Static interp
 ## Step 6 | Generate the initial conditions
 
 ```bash
-cp "$TUTORIAL/config/namelist.init.met" namelist.init_atmosphere
-cp "$TUTORIAL/config/streams.init.met" streams.init_atmosphere
 nano namelist.init_atmosphere
+nano streams.init_atmosphere
 ```
 
 Check the start/stop time is `2022-07-19_00:00:00`, prefix is `ERA5`, and vertical levels are 55 with `vertical_levels/urban_ZR_75.txt`. This file has 56 interfaces, from the surface to 30 km.
@@ -178,6 +179,13 @@ The reference uses 38 meteorological levels (37 ERA5 pressure levels plus a surf
 
 This stage reads the existing static file, builds the vertical grid and interpolates ERA5 at the initial time. It does not remake geographic fields.
 
+In `streams.init_atmosphere`, change the two `filename_template` values:
+
+- `input`: `heatwave2022.grid.nc` to `heatwave2022.static.nc`.
+- `output`: `heatwave2022.static.nc` to `heatwave2022.init.nc`.
+
+Keep the other stream settings unchanged.
+
 ```bash
 mpiexec -n "$NPROCS" ./init_atmosphere_model
 cp log.init_atmosphere.0000.out log.initial.out
@@ -192,8 +200,33 @@ Allow tens of minutes to hours as a broad planning range; actual time depends on
 The run uses evolving SST. Prepare a surface-update file covering the full integration, using the hourly ERA5 intermediate files from Step 1.
 
 ```bash
-cp "$TUTORIAL/config/namelist.init.surface" namelist.init_atmosphere
-cp "$TUTORIAL/config/streams.init.surface" streams.init_atmosphere
+nano namelist.init_atmosphere
+```
+
+In `&nhyd_model`, set:
+
+```fortran
+ config_init_case = 8
+ config_start_time = '2022-07-19_00:00:00'
+ config_stop_time = '2022-07-30_06:00:00'
+```
+
+In `&data_sources`, retain `config_sfc_prefix = 'ERA5'` and `config_fg_interval = 3600`. Set the six stage switches to:
+
+```fortran
+&preproc_stages
+ config_static_interp = false
+ config_native_gwd_static = false
+ config_vertical_grid = false
+ config_met_interp = false
+ config_input_sst = true
+ config_frac_seaice = true
+/
+```
+
+Keep `streams.init_atmosphere` as it was after Step 6. Its `input` reads `heatwave2022.static.nc`; the `surface` stream already writes `heatwave2022.sfc_update.nc` with `output_interval="3600"`. Case 8 uses this surface output, not the initial-condition output.
+
+```bash
 mpiexec -n "$NPROCS" ./init_atmosphere_model
 cp log.init_atmosphere.0000.out log.surface.out
 ls -lh heatwave2022.sfc_update.nc

@@ -1,3 +1,4 @@
+<!-- Static-stage defaults; change input/output filenames in Guide 2 Steps 6-7. -->
 <streams>
   <immutable_stream name="input" type="input"
     filename_template="heatwave2022.grid.nc"

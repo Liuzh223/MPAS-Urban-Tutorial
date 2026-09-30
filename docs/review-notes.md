@@ -9,7 +9,7 @@ Reviewed 30 September 2026.
 - Removed modified-source branches, experiment-specific table changes and bundled case-data downloads.
 - Linked the mesh repository cited in Cao et al. (2026); described ERA5 preparation instead of distributing data.
 - Kept soil background and one optional BNU explanation in the initialization guide.
-- Split static, meteorological and surface-update initialization into separate reference namelists and streams.
+- Use one initialization namelist/streams pair, with the static, initial-condition and surface-update edits explained in Guide 2; retain one atmosphere pair.
 
 ## Evidence and limits
 

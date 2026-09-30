@@ -14,7 +14,7 @@ registries={
     'init':source('src/core_init_atmosphere/Registry.xml'),
     'atmosphere':source('src/core_atmosphere/Registry.xml')+source('src/core_atmosphere/physics/Registry_noahmp.xml')+source('src/core_atmosphere/diagnostics/Registry_soundings.xml')}
 for path in (ROOT/'config').glob('namelist.*'):
-    known=set(re.findall(r'<nml_option\s+name="([^"]+)"',registries['init' if '.init.' in path.name else 'atmosphere']))
+    known=set(re.findall(r'<nml_option\s+name="([^"]+)"',registries['init' if 'init_atmosphere' in path.name else 'atmosphere']))
     used=set(re.findall(r'^\s*(config_\w+)\s*=',path.read_text(),re.M))
     assert not used-known,(path.name,used-known)
     print('Registry option check:',path.name,len(used))

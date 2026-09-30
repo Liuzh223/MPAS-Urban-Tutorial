@@ -31,6 +31,8 @@ $HOME/MPAS/
 
 The guides define `MPAS_BUILD` as the path to the compiled `HKUST-MPAS` directory. Case directories link to its executables and runtime files.
 
+`config/` contains only four files: `namelist.init_atmosphere`, `streams.init_atmosphere`, `namelist.atmosphere` and `streams.atmosphere`. Guide 2 explains how to update the same initialization pair for each stage.
+
 ## Teaching case
 
 | Setting | Value |

@@ -1,5 +1,6 @@
 """Build the three PDFs from their Markdown sources (ReportLab)."""
 from pathlib import Path
+import sys
 import re
 from html import escape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted, KeepTogether, PageBreak
@@ -84,7 +85,7 @@ def footer(canvas,doc):
     canvas.drawString(48,31,'MPAS-URBAN | HONG KONG HEATWAVE 2022')
     canvas.drawRightString(A4[0]-48,31,str(doc.page))
 
-for stem in ('01-installation','02-initialization','03-running'):
+for stem in (sys.argv[1:] or ('01-installation','02-initialization','03-running')):
     text=(ROOT/'docs'/f'{stem}.md').read_text(encoding='utf-8')
     story=parse(text)
     if stem=='01-installation':
