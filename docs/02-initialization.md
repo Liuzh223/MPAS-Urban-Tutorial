@@ -4,6 +4,8 @@ Guide 2 of 3 | LIU Zhuo | The Hong Kong University of Science and Technology
 
 Compile both cores using Guide 1 first. This guide prepares geographic fields and initial conditions for a global Hong Kong-refined mesh. Surface updates are optional.
 
+Case reference: [Cao et al. (2026), MPAS-Urban and the record-breaking 2022 Hong Kong heatwave](https://doi.org/10.22541/essoar.15007108/v1), ESS Open Archive preprint.
+
 ## Step 1 | Prepare the mesh and ERA5 inputs
 
 The teaching period is 2022-07-19 00:00 UTC to 2022-07-30 06:00 UTC. Follow the [mesh-generation repository cited by Cao et al.](https://github.com/caomoyu/MPAS-A-mesh-generation) for the global variable-resolution mesh, refined to about 500 m around Hong Kong and coarsening to about 30 km. The inspected case mesh contains 746,053 cells; a newly generated mesh can differ.
@@ -15,7 +17,7 @@ Prepare ERA5 [pressure-level](https://cds.climate.copernicus.eu/datasets/reanaly
 - Initial conditions: one complete intermediate file, `ERA5:2022-07-19_00`, containing the required atmospheric, surface and soil fields.
 - Optional surface updates: only if you choose Step 7, prepare SST and sea-ice fields every 3 hours from 19 July 00:00 to 30 July 06:00 UTC with prefix `SST`. Otherwise, the one complete initial-time ERA5 file is sufficient.
 
-This is a global simulation: no time series of atmospheric lateral-boundary forcing is needed. Do not download complete atmospheric and soil fields for every later time just to update SST.
+This global case does not require lateral boundary conditions.
 
 For WPS preparation, follow the [official WRF/WPS guide](https://www2.mmm.ucar.edu/wrf/site/documentation/users_guide/wps.html) and the [MPAS real-data tutorial](https://www2.mmm.ucar.edu/projects/mpas/tutorial/StAndrews2025/). Use the ERA5-compatible Vtable and inspect the resulting intermediate records. MPAS reads these files directly; WRF `met_em` files are not used here.
 

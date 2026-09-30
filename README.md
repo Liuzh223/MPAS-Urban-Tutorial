@@ -35,6 +35,8 @@ The guides define `MPAS_BUILD` as the path to the compiled `HKUST-MPAS` director
 
 ## Teaching case
 
+Case preprint: Cao et al. (2026), [Toward high-resolution urban modeling with MPAS-Urban: System development and sub-kilometer application for record-breaking 2022 Hong Kong Heatwave](https://doi.org/10.22541/essoar.15007108/v1). ESS Open Archive, 6 August 2026.
+
 | Setting | Value |
 | --- | --- |
 | Simulation period (UTC) | 19 July 2022 00:00 to 30 July 2022 06:00 |
