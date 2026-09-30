@@ -57,7 +57,7 @@ Open `namelist.atmosphere`. The supplied configuration uses:
 
 The physics configuration retains the reference case's choices: Thompson microphysics, Grell-Freitas convection, YSU boundary layer, YSU gravity-wave drag, RRTMG radiation, revised Monin-Obukhov surface layer, and Noah-MP with SLUCM. The supplied namelist also retains the reference Noah-MP option values.
 
-Radiation is called every 30 minutes. SST updates are enabled. `streams.atmosphere` reads surface updates hourly and writes history and diagnostics hourly. The mesh is global, so lateral boundary conditions are disabled.
+Radiation is called every 30 minutes. SST updates are enabled. The surface file contains 3-hourly records; `streams.atmosphere` retains the original case's hourly surface-read setting. This does not require hourly ERA5 downloads. History and diagnostics are written hourly. The global mesh does not require atmospheric lateral-boundary forcing.
 
 ## Step 4 | Run a short test
 

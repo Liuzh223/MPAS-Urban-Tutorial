@@ -15,7 +15,7 @@ Reviewed 30 September 2026.
 
 The teaching dates, time step, model length scale, urban physics and Noah-MP settings were checked against the available July 2022 case configuration. File paths were replaced with the shared workspace layout. The inspected run's physics choices are retained; its custom runtime tables and source modifications are not copied.
 
-The ERA5 workflow here specifies hourly surface inputs consistently in the namelist and streams. Users prepare those inputs themselves; this is not a packaged reproduction of the original forcing files.
+The ERA5 workflow uses one complete initial-time intermediate file and a separate sequence of SST/sea-ice intermediate files. Inspection of the original surface file's `xtime` confirms 3-hourly records, beginning on 19 July 2022. The tutorial generates records every 10800 seconds through 30 July 06:00. The original atmosphere surface-read setting is hourly and is retained; this is distinct from the input record spacing. Users prepare these inputs themselves; they are not packaged here.
 
 The earlier installation audit established a working GNU/MPI/NetCDF dependency stack. The new documentation is checked against official HKUST-MPAS `hkust-dev` commit [c4f208931c008a7578a42cdc23d854f77d7de4cc](https://github.com/HKUST-MPAS/HKUST-MPAS/commit/c4f208931c008a7578a42cdc23d854f77d7de4cc). A full compile, initialization and atmosphere integration of this newly assembled case has not been performed.
 

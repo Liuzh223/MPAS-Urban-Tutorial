@@ -10,7 +10,12 @@ The teaching period is 2022-07-19 00:00 UTC to 2022-07-30 06:00 UTC. Follow the 
 
 Prepare a model-ready spherical MPAS mesh and its matching, unpartitioned graph. Complete the mesh conversion/scaling steps in the mesh workflow; a raw unit-sphere mesh is not the final Earth-sized input. Keep the cell ordering identical between mesh and graph.
 
-Download ERA5 [pressure-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels) and [single-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels) fields. Prepare WPS intermediate files with prefix `ERA5`. Include atmospheric fields, surface pressure, land/sea information, soil temperature/moisture, SST and sea ice. This example uses hourly files across the full period for surface updates.
+Prepare two separate inputs from ERA5 [pressure-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels) and [single-level](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels) data:
+
+- Initial conditions: one complete intermediate file, `ERA5:2022-07-19_00`, containing the required atmospheric, surface and soil fields.
+- Surface updates: SST and sea-ice fields every 3 hours from 19 July 00:00 to 30 July 06:00 UTC, prepared with the separate prefix `SST`. The inspected case surface file has 3-hourly records.
+
+This is a global simulation: no time series of atmospheric lateral-boundary forcing is needed. Do not download complete atmospheric and soil fields for every later time just to update SST.
 
 For WPS preparation, follow the [official WRF/WPS guide](https://www2.mmm.ucar.edu/wrf/site/documentation/users_guide/wps.html) and the [MPAS real-data tutorial](https://www2.mmm.ucar.edu/projects/mpas/tutorial/StAndrews2025/). Use the ERA5-compatible Vtable and inspect the resulting intermediate records. MPAS reads these files directly; WRF `met_em` files are not used here.
 
@@ -21,9 +26,10 @@ $HOME/MPAS/DATA/heatwave2022/
 |-- heatwave2022.grid.nc
 |-- heatwave2022.graph.info
 |-- ERA5:2022-07-19_00
-|-- ERA5:2022-07-19_01
+|-- SST:2022-07-19_00
+|-- SST:2022-07-19_03
 |-- ...
-`-- ERA5:2022-07-30_06
+`-- SST:2022-07-30_06
 ```
 
 ## Step 2 | Prepare static geographic data
@@ -92,8 +98,7 @@ ln -sf "$INPUT/heatwave2022.grid.nc" .
 ln -sf "$INPUT/heatwave2022.graph.info" .
 ln -sf "$MPAS_BUILD/vertical_levels" .
 test -s "$INPUT/ERA5:2022-07-19_00"
-test -s "$INPUT/ERA5:2022-07-30_06"
-ln -sf "$INPUT"/ERA5:* .
+ln -sf "$INPUT/ERA5:2022-07-19_00" .
 ```
 
 ## Step 4 | Partition the mesh
@@ -197,9 +202,12 @@ Allow tens of minutes to hours as a broad planning range; actual time depends on
 
 ## Step 7 | Generate surface updates
 
-The run uses evolving SST. Prepare a surface-update file covering the full integration, using the hourly ERA5 intermediate files from Step 1.
+The run uses evolving SST. Use the 3-hourly SST and sea-ice intermediate files prepared in Step 1. These are surface-only inputs, separate from the single complete ERA5 initialization file.
 
 ```bash
+test -s "$INPUT/SST:2022-07-19_00"
+test -s "$INPUT/SST:2022-07-30_06"
+ln -sf "$INPUT"/SST:* .
 nano namelist.init_atmosphere
 ```
 
@@ -211,7 +219,7 @@ In `&nhyd_model`, set:
  config_stop_time = '2022-07-30_06:00:00'
 ```
 
-In `&data_sources`, retain `config_sfc_prefix = 'ERA5'` and `config_fg_interval = 3600`. Set the six stage switches to:
+In `&data_sources`, retain `config_sfc_prefix = 'SST'` and `config_fg_interval = 10800` (3 hours). Set the six stage switches to:
 
 ```fortran
 &preproc_stages
@@ -224,7 +232,7 @@ In `&data_sources`, retain `config_sfc_prefix = 'ERA5'` and `config_fg_interval 
 /
 ```
 
-Keep `streams.init_atmosphere` as it was after Step 6. Its `input` reads `heatwave2022.static.nc`; the `surface` stream already writes `heatwave2022.sfc_update.nc` with `output_interval="3600"`. Case 8 uses this surface output, not the initial-condition output.
+Keep `streams.init_atmosphere` as it was after Step 6. Its `input` reads `heatwave2022.static.nc`; the `surface` stream already writes `heatwave2022.sfc_update.nc` with `output_interval="10800"`. Case 8 uses this surface output, not the initial-condition output.
 
 ```bash
 mpiexec -n "$NPROCS" ./init_atmosphere_model
@@ -233,6 +241,6 @@ ls -lh heatwave2022.sfc_update.nc
 ncdump -v xtime heatwave2022.sfc_update.nc
 ```
 
-This is initialization case 8, with `config_sfc_prefix = 'ERA5'`, a 3600 s interval, and start/end times matching the teaching period. Confirm the time records cover 19 July 00:00 through 30 July 06:00 UTC. The atmosphere stream also reads surface updates every hour.
+Check that `xtime` contains records every 3 hours, covering 19 July 00:00 through 30 July 06:00 UTC. The original atmosphere configuration's hourly surface-stream read interval is retained; it is not a requirement for hourly ERA5 input records.
 
 You now have the three generated inputs: `heatwave2022.static.nc`, `heatwave2022.init.nc` and `heatwave2022.sfc_update.nc`. Continue with Guide 3.

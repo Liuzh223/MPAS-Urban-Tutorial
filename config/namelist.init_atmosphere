@@ -13,8 +13,8 @@
 &data_sources
  config_geog_data_path = 'CHANGE_ME/MPAS/DATA/mpas_static/'
  config_met_prefix = 'ERA5'
- config_sfc_prefix = 'ERA5'
- config_fg_interval = 3600
+ config_sfc_prefix = 'SST'
+ config_fg_interval = 10800
  config_landuse_data = 'CGLC_LCZ'
  config_topo_data = 'GMTED2010'
  config_vegfrac_data = 'MODIS'
